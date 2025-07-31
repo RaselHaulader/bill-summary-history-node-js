@@ -93,9 +93,6 @@ router.post('/remove-person', async (req, res) => {
 // Reset All Data
 router.post('/reset-data', async (req, res) => {
   await History.deleteMany({});
-  await Person.deleteMany({});
-  await Bill.deleteMany({});
-  await Bill.create({ bill_amount: 0.0, deu_amount: 0.0 });
   res.redirect('/');
 });
 
