@@ -40,9 +40,10 @@ router.post('/add-shared-bill', async (req, res) => {
 // POS personal bill
 router.post('/add-person-bill', async (req, res) => {
   const { personId, name, amount, date } = req.body;
+  const currentPerson = await Person.findById(personId);
   await Person.updateOne({ _id: personId }, { $inc: { due: amount } });
   await Bill.updateOne({}, { $inc: { bill_amount: amount, deu_amount: amount } });
-  await History.create({ name, amount, bill_type: 'Personal-bill', date });
+  await History.create({ name, amount, bill_type: `Personal-bill (total: ${(currentPerson.due + amount).toFixed(2)})`, date });
   const count = await History.countDocuments();
   if (count > 70) {
     const oldest = await History.findOne().sort({ _id: 1 }); // oldest entry by creation order
@@ -56,9 +57,11 @@ router.post('/add-person-bill', async (req, res) => {
 // POST payment
 router.post('/add-payment', async (req, res) => {
   const { personId, name, amount, date } = req.body;
+  const currentPerson = await Person.findById(personId);
   await Person.updateOne({ _id: personId }, { $inc: { due: -amount } });
   await Bill.updateOne({}, { $inc: { bill_amount: -amount, deu_amount: -amount } });
-  await History.create({ name, amount, bill_type: 'Paid', date });
+  const currentStatus = currentPerson.due > amount ? `(Due: ${(currentPerson.due - amount).toFixed(2)})` : currentPerson.due < amount ?  `(Savings: ${(amount - currentPerson.due).toFixed(2)})` : '(All clear)';
+  await History.create({ name, amount, bill_type: `Paid ${currentStatus}`, date });
   const count = await History.countDocuments();
   if (count > 70) {
     const oldest = await History.findOne().sort({ _id: 1 }); // oldest entry by creation order
