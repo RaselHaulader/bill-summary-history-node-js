@@ -60,7 +60,7 @@ router.post('/add-payment', async (req, res) => {
   const currentPerson = await Person.findById(personId);
   await Person.updateOne({ _id: personId }, { $inc: { due: -amount } });
   await Bill.updateOne({}, { $inc: { bill_amount: -amount, deu_amount: -amount } });
-  const currentStatus = currentPerson.due > amount ? `(Due: ${(currentPerson.due - amount).toFixed(2)})` : currentPerson.due < amount ?  `(Savings: ${(amount - currentPerson.due).toFixed(2)})` : '(All clear)';
+  const currentStatus = currentPerson.due.toFixed(2) > amount.toFixed(2) ? `(Due: ${currentPerson.due.toFixed(2) - amount.toFixed(2)})` : currentPerson.due.toFixed(2) < amount.toFixed(2) ?  `(Savings: ${(amount.toFixed(2) - currentPerson.due.toFixed(2)).toFixed(2)})` : '(All clear)';
   await History.create({ name, amount, bill_type: `Paid ${currentStatus}`, date });
   const count = await History.countDocuments();
   if (count > 70) {
