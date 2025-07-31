@@ -26,7 +26,7 @@ router.post('/add-shared-bill', async (req, res) => {
   const share = amount / people.length;
   await Bill.updateOne({}, { $inc: { bill_amount: amount, deu_amount: amount } });
   await Person.updateMany({}, { $inc: { due: share.toFixed(4) } });
-  await History.create({ name: 'All', amount, bill_type: 'Shared-bill', date });
+  await History.create({ name: 'All', amount, bill_type: `Share-bill (${share.toFixed(4)} * ${people.length})`, date });
   const count = await History.countDocuments();
   if (count > 70) {
     const oldest = await History.findOne().sort({ _id: 1 }); // oldest entry by creation order
